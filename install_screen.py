@@ -1,3 +1,4 @@
+""" Import necessary modules for the program to work """
 import sys
 import os
 from PyQt5.QtWidgets import (
@@ -6,6 +7,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QFont, QFontDatabase, QPainter, QColor, QPen
 from PyQt5.QtCore import Qt, QTimer
 
+
+
+""" Create a class for the installation UI """
 class InstallScreen(QWidget):
     def __init__(self):
         super().__init__()
@@ -13,8 +17,6 @@ class InstallScreen(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.showFullScreen()
         self.setStyleSheet("background-color: black;")
-        
-        # Pencereyi her zaman en üstte tut
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setWindowState(Qt.WindowFullScreen | Qt.WindowActive)
         self.load_chakra_petch_font()
@@ -40,6 +42,7 @@ class InstallScreen(QWidget):
         layout.addLayout(spinner_layout)
         self.setLayout(layout)
 
+    """ Load the Chakra Petch font, which is used for the UI """
     def load_chakra_petch_font(self):
         try:
             if getattr(sys, 'frozen', False):
@@ -56,7 +59,11 @@ class InstallScreen(QWidget):
             print(f"Error loading font: {e}")
 
 
+
+""" Create a class for the loading spinner in the UI """
 class LoadingSpinner(QFrame):
+
+    """ Initialization """
     def __init__(self):
         super().__init__()
         self.setFixedSize(100, 100)
@@ -66,6 +73,7 @@ class LoadingSpinner(QFrame):
         self.timer.timeout.connect(self.update)
         self.timer.start(30)
 
+    """ Use QPainter to draw the spinner """
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -76,10 +84,12 @@ class LoadingSpinner(QFrame):
         rect = self.rect()
         painter.drawArc(rect.adjusted(10, 10, -10, -10), self.angle * 16, 100 * 16)
 
+    """ Begin spinning """
     def start_spinning(self):
         self.angle = 0
         self.update()
 
+    """ Update the spinner to spin """
     def update(self):
         self.angle -= 5
         if self.angle <= -360:

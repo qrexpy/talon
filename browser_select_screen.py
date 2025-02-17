@@ -1,3 +1,4 @@
+""" Import necessary modules for the program to work """
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QGraphicsDropShadowEffect, QSpacerItem, QSizePolicy
 )
@@ -6,7 +7,12 @@ from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve
 import os
 import sys
 
+
+
+""" Create a class for the buttons in the UI """
 class AnimatedButton(QPushButton):
+
+    """ Initialization """
     def __init__(self, text, color, hover_color=None, is_firefox=False):
         super().__init__(text)
         self.default_color = color
@@ -27,6 +33,7 @@ class AnimatedButton(QPushButton):
         self.animation.setDuration(800)
         self.animation.setEasingCurve(QEasingCurve.InOutQuad)
 
+    """ Hover effect """
     def enterEvent(self, event):
         self.animation.stop()
         self.animation.setStartValue(self.shadow_effect.blurRadius())
@@ -36,6 +43,7 @@ class AnimatedButton(QPushButton):
         self.setStyleSheet(f"background-color: {self.hover_color.name()}; color: {text_color}; border: none;")
         super().enterEvent(event)
 
+    """ Unhover effect """
     def leaveEvent(self, event):
         self.animation.stop()
         self.animation.setStartValue(self.shadow_effect.blurRadius())
@@ -45,7 +53,12 @@ class AnimatedButton(QPushButton):
         self.setStyleSheet(f"background-color: {self.default_color.name()}; color: {text_color.name()}; border: none;")
         super().leaveEvent(event)
 
+
+
+""" Create a class for the browser selection UI """
 class BrowserSelectScreen(QWidget):
+
+    """ Initialization """
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Browser Selector")
@@ -107,6 +120,7 @@ class BrowserSelectScreen(QWidget):
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
+    """ Load the Chakra Petch font, which is used for the UI """
     def load_chakra_petch_font(self):
         try:
             if getattr(sys, 'frozen', False):
@@ -122,6 +136,7 @@ class BrowserSelectScreen(QWidget):
         except Exception as e:
             print(f"Error loading font: {e}")
 
+    """ Return value of the selected browser """
     def select_browser(self, browser_name):
         self.selected_browser = browser_name
         print(f"Selected browser: {self.selected_browser}")

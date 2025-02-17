@@ -1,3 +1,4 @@
+""" Import the necessary modules for the program to work """
 import os
 import sys
 import json
@@ -9,9 +10,15 @@ import urllib.request
 from pathlib import Path
 from tqdm import tqdm
 
+
+
+""" Set up logging """
 def log(message):
     logging.info(message)
 
+
+
+""" Utility function to fetch the packages.json file """
 def get_packages_json():
     url = "https://raw.githubusercontent.com/ravendevteam/toolbox/refs/heads/main/packages.json"
     try:
@@ -22,6 +29,9 @@ def get_packages_json():
         log(f"Error downloading packages.json: {e}")
         return None
 
+
+
+""" Add exclusions for Raven software to Windows Defender """
 def add_defender_exclusion(path):
     try:
         subprocess.run(
@@ -36,20 +46,22 @@ def add_defender_exclusion(path):
         log(f"Failed to add Windows Defender exclusion: {e}")
         return False
 
+
+
+""" Utility path to get the installation path for Raven software """
 def get_installation_path():
     if platform.system() == "Windows":
         install_path = Path(os.getenv('APPDATA')) / "ravendevteam"
         install_path.mkdir(parents=True, exist_ok=True)
-        
-        # Windows Defender istisnası ekle
         add_defender_exclusion(str(install_path))
-        
         return install_path
     else:
         return Path.home() / "Library" / "Application Support" / "ravendevteam"
 
-def download_file(url, destination, desc="Downloading"):
 
+
+""" Utility function to download a program """
+def download_file(url, destination, desc="Downloading"):
     try:
         context = ssl._create_unverified_context()
         with tqdm(unit='B', unit_scale=True, desc=desc) as pbar:
@@ -66,8 +78,10 @@ def download_file(url, destination, desc="Downloading"):
         log(f"Download error: {e}")
         return False
 
-def create_shortcut(target_path, shortcut_name):
 
+
+""" Utility function to create a shortcut at the desktop """
+def create_shortcut(target_path, shortcut_name):
     try:
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
         shortcut_path = os.path.join(desktop, f"{shortcut_name}.lnk")
@@ -79,47 +93,42 @@ def create_shortcut(target_path, shortcut_name):
         log(f"Failed to create shortcut: {e}")
         return False
 
-def install_package(package, install_dir):
 
+
+""" Utility function to install the specified package """
+def install_package(package, install_dir):
     platform_name = platform.system()
-    
     if platform_name not in package["os"]:
         log(f"Package {package['name']} is not available for {platform_name}")
         return False
-
     package_dir = install_dir / package["name"]
     package_dir.mkdir(parents=True, exist_ok=True)
-
     url = package["url"][platform_name]
     file_name = url.split("/")[-1]
     download_path = package_dir / file_name
-
     log(f"Installing {package['name']} v{package['version']}...")
-    
     if not download_file(url, download_path, f"Downloading {package['name']}"):
         return False
-
     if package["shortcut"] and platform_name == "Windows":
         create_shortcut(str(download_path), package["name"])
-
     log(f"Successfully installed {package['name']}")
     return True
 
+
+
+""" Begin the process of fetching the package list then installing them """
 def run_toolbox():
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
-
     log("Fetching package list...")
     packages_data = get_packages_json()
     if not packages_data:
         log("Failed to fetch packages data")
         return False
-
     install_dir = get_installation_path()
     install_dir.mkdir(parents=True, exist_ok=True)
-
     success = True
     for package in packages_data["packages"]:
         if not install_package(package, install_dir):
@@ -127,7 +136,6 @@ def run_toolbox():
             log(f"Failed to install {package['name']}")
         else:
             log(f"Successfully installed {package['name']}")
-
     log("Installation process completed" + (" successfully" if success else " with some failures"))
     return success
 

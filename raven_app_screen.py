@@ -1,3 +1,4 @@
+""" Import necessary modules for the program to work """
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QGraphicsDropShadowEffect, QSpacerItem, QSizePolicy, QGraphicsView
 )
@@ -6,7 +7,12 @@ from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve
 import os
 import sys
 
+
+
+""" Create a class for the buttons in the UI """
 class AnimatedButton(QPushButton):
+
+    """ Initialization """
     def __init__(self, text, color, hover_color=None):
         super().__init__(text)
         self.default_color = color
@@ -23,6 +29,7 @@ class AnimatedButton(QPushButton):
         self.animation.setDuration(800)
         self.animation.setEasingCurve(QEasingCurve.InOutQuad)
 
+    """ Hover effect """
     def enterEvent(self, event):
         self.animation.stop()
         self.animation.setStartValue(self.shadow_effect.blurRadius())
@@ -30,6 +37,7 @@ class AnimatedButton(QPushButton):
         self.animation.start()
         super().enterEvent(event)
 
+    """ Unhover effect """
     def leaveEvent(self, event):
         self.animation.stop()
         self.animation.setStartValue(self.shadow_effect.blurRadius())
@@ -37,7 +45,12 @@ class AnimatedButton(QPushButton):
         self.animation.start()
         super().leaveEvent(event)
 
+
+
+""" Create a class for the Raven app selection UI """
 class RavenAppScreen(QWidget):
+
+    """ Initialization """
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Optional: Install Raven Software")
@@ -85,6 +98,7 @@ class RavenAppScreen(QWidget):
         self.setLayout(layout)
         self.selected_option = None
 
+    """ Load the Chakra Petch font, which is used for the UI """
     def load_chakra_petch_font(self):
         try:
             if getattr(sys, 'frozen', False):
@@ -101,6 +115,7 @@ class RavenAppScreen(QWidget):
         except Exception as e:
             print(f"Error loading font: {e}")
 
+    """ Return the selected option """
     def select_option(self, option):
         self.selected_option = option
         print(f"Selected option: {'Yes' if option else 'No'}")

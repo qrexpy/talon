@@ -1,5 +1,9 @@
+""" Import necessary modules for the program to work """
 import subprocess
 
+
+
+""" Install whichever browser the user selected from browser_select_screen """
 def install_browser(selected_browser):
     browser_map = {
         "Chrome": "Google.Chrome",

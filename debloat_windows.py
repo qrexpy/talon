@@ -1,3 +1,4 @@
+""" Import necessary modules for the program to work """
 import sys
 import ctypes
 import os
@@ -10,6 +11,9 @@ import time
 import logging
 import json
 
+
+
+""" Set up the log file """
 LOG_FILE = "talon.txt"
 logging.basicConfig(
     filename=LOG_FILE,
@@ -17,22 +21,34 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
+
+
+""" Utility function to log outputs """
 def log(message):
     logging.info(message)
     print(message)
 
+
+
+""" Utility function to check if the program is running as administrator """
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
 
+
+
+""" If the program is not running as administrator, attempt to elevate """
 if not is_admin():
     ctypes.windll.shell32.ShellExecuteW(
         None, "runas", sys.executable, " ".join(sys.argv), None, 1
     )
     sys.exit(0)
 
+
+
+""" Apply modifications done via the Windows registry """
 def apply_registry_changes():
     log("Applying registry changes...")
     try:
@@ -51,6 +67,8 @@ def apply_registry_changes():
             (winreg.HKEY_CURRENT_USER, r"Control Panel\\Desktop\\WindowMetrics", "MinAnimate", winreg.REG_DWORD, 0),# Disable minimize/maximize animations
             (winreg.HKEY_CURRENT_USER, r"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "ExtendedUIHoverTime", winreg.REG_DWORD, 1),# Reduce hover time for tooltips and UI elements
             (winreg.HKEY_CURRENT_USER, r"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "HideFileExt", winreg.REG_DWORD, 0),# Show file extensions in Explorer (useful for security and organization)
+            (winreg.HKEY_CURRENT_USER, r"Control Panel\\Colors", "Hilight", winreg.REG_SZ, "0 0 0"), # Sets highlight color to black
+            (winreg.HKEY_CURRENT_USER, r"Control Panel\\Colors", "HotTrackingColor", winreg.REG_SZ, "0 0 0"), # Sets the click-and-drag box color to black
         ]
         for root_key, key_path, value_name, value_type, value in registry_modifications:
             try:
@@ -69,6 +87,9 @@ def apply_registry_changes():
     except Exception as e:
         log(f"Error applying registry changes: {e}")
 
+
+
+""" Run a script to remove Edge, and prevent reinstallation """
 def run_edge_vanisher():
     log("Starting Edge Vanisher script execution...")
     try:
@@ -116,6 +137,9 @@ def run_edge_vanisher():
         log(f"Unexpected error during Edge Vanisher execution: {str(e)}")
         run_oouninstall()
 
+
+
+""" Run a script to remove OneDrive and Outlook """
 def run_oouninstall():
     log("Starting Office Online uninstallation process...")
     try:
@@ -155,6 +179,9 @@ def run_oouninstall():
         log(f"Unexpected error during OO uninstallation: {str(e)}")
         run_tweaks()
 
+
+
+""" Run ChrisTitusTech's WinUtil to debloat the system (Thanks Chris, you're a legend!) """
 def run_tweaks():
     logging.basicConfig(
         level=logging.INFO,
@@ -226,6 +253,9 @@ def run_tweaks():
         run_applybackground()
         os._exit(1)
 
+
+
+""" Run a program to set the background of the system """
 def run_applybackground():
     log("Starting ApplyBackground tweaks...")
     try:
@@ -280,6 +310,9 @@ def run_applybackground():
         log(f"Error in ApplyBackground: {str(e)}")
         run_winconfig()
 
+
+
+""" Run Raphi's Win11Debloat script to further debloat the system (Thanks Raphire!) """
 def run_winconfig():
     log("Starting Windows configuration process...")
     try:
@@ -301,6 +334,8 @@ def run_winconfig():
             f"& '{script_path}' -Silent -RemoveApps -RemoveGamingApps -DisableTelemetry "
             f"-DisableBing -DisableSuggestions -DisableLockscreenTips -RevertContextMenu "
             f"-TaskbarAlignLeft -HideSearchTb -DisableWidgets -DisableCopilot -ExplorerToThisPC"
+            f"-ClearStartAllUsers -DisableDVR -DisableStartRecommended -ExplorerToThisPC"
+            f"-DisableMouseAcceleration"
         )
         log(f"Executing PowerShell command with parameters:")
         log(f"Command: {powershell_command}")
@@ -360,6 +395,9 @@ def run_winconfig():
             log(f"Failed to start UpdatePolicyChanger after unexpected error: {inner_e}")
             run_updatepolicychanger()
 
+
+
+""" Run a script to establish an update policy which only accepts security updates """
 def run_updatepolicychanger():
     log("Starting UpdatePolicyChanger script execution...")
     log("Checking system state before UpdatePolicyChanger execution...")
@@ -443,6 +481,8 @@ def run_updatepolicychanger():
         finalize_installation()
 
 
+
+""" Finalize installation by restarting """
 def finalize_installation():
     log("Installation complete. Restarting system...")
     try:
@@ -454,5 +494,8 @@ def finalize_installation():
         except Exception as e:
             log(f"Failed to restart system: {e}")
 
+
+
+""" Run the program """
 if __name__ == "__main__":
     apply_registry_changes()

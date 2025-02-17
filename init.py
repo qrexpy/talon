@@ -1,3 +1,4 @@
+""" Import necessary modules for the program to work """
 import sys
 import os
 import ctypes
@@ -12,13 +13,16 @@ from install_screen import InstallScreen
 import debloat_windows
 import raven_software_install
 import browser_install
+import windows_check
 import time
 from PyQt5.QtCore import QTimer
 import platform
 import winreg
 
+""" Establish the version of Talon """
 TALON_VERSION = "1.1.0"
 
+""" Set up the log file """
 LOG_FILE = "talon.txt"
 logging.basicConfig(
     filename=LOG_FILE,
@@ -26,6 +30,9 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+
+
+""" Utility function to obtain information about Windows """
 def get_windows_info():
     try:
         windows_version = platform.win32_ver()
@@ -46,6 +53,9 @@ def get_windows_info():
         logging.error(f"Error getting Windows information: {e}")
         return None
 
+
+
+""" Utility function to check if the program is being ran as administrator """
 def is_running_as_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
@@ -53,6 +63,9 @@ def is_running_as_admin():
         logging.error(f"Error checking admin privileges: {e}")
         return False
 
+
+
+""" If the program is not being ran as administrator, elevate """
 def restart_as_admin():
     try:
         script = sys.argv[0]
@@ -63,22 +76,21 @@ def restart_as_admin():
     except Exception as e:
         logging.error(f"Error restarting as admin: {e}")
 
+
+
+""" Main function to begin Talon installation """
 def main():
     logging.info("Starting Talon Installer")
     logging.info(f"Talon Version: {TALON_VERSION}")
-    
     windows_info = get_windows_info()
     if windows_info:
         logging.info(f"Windows Version: {windows_info['product_name']}")
         logging.info(f"Build Number: {windows_info['build']}")
         logging.info(f"Display Version: {windows_info['display_version']}")
-    
     app = QApplication(sys.argv)
-
     if not is_running_as_admin():
         logging.warning("Program is not running as admin. Restarting with admin rights...")
         restart_as_admin()
-
     try:
         logging.info("Starting Defender check...")
         defender_check_window = DefenderCheck()
@@ -89,8 +101,13 @@ def main():
         logging.info("Defender is disabled, proceeding with the rest of the program.")
     except Exception as e:
         logging.error(f"Error during Defender check: {e}")
-
     selected_browser = None
+    try:
+        logging.info("Running Windows 11 and fresh install check...")
+        windows_check.check_system()
+        logging.info("System check passed.")
+    except Exception as e:
+        logging.error(f"System check failed: {e}")
     try:
         logging.info("Displaying browser selection screen...")
         browser_select_screen = BrowserSelectScreen()
@@ -103,7 +120,6 @@ def main():
         browser_select_screen.close()
     except Exception as e:
         logging.error(f"Error during browser selection: {e}")
-
     install_raven = None
     try:
         logging.info("Displaying Raven app installation screen...")
@@ -117,7 +133,6 @@ def main():
         raven_app_screen.close()
     except Exception as e:
         logging.error(f"Error during Raven app installation decision: {e}")
-
     try:
         logging.info("Displaying installation screen...")
         install_screen = InstallScreen()
@@ -125,6 +140,7 @@ def main():
     except Exception as e:
         logging.error(f"Error during installation screen setup: {e}")
 
+    """ Run the installation process """
     def perform_installation():
         try:
             if install_raven:
@@ -133,23 +149,19 @@ def main():
                 logging.info("Raven software installed.")
         except Exception as e:
             logging.error(f"Error during Raven software installation: {e}")
-
         try:
             logging.info(f"Installing {selected_browser} browser...")
             browser_install.install_browser(selected_browser)
             logging.info(f"{selected_browser} browser installation complete.")
         except Exception as e:
             logging.error(f"Error during browser installation: {e}")
-
         try:
             logging.info("Applying Windows registry modifications and customizations...")
             debloat_windows.apply_registry_changes()
             logging.info("Debloat and customization complete.")
         except Exception as e:
             logging.error(f"Error applying registry changes: {e}")
-
         logging.info("All installations and configurations completed.")
-        
         install_screen.close()
         logging.info("Installation complete. Restarting system...")
         debloat_windows.finalize_installation()
@@ -158,15 +170,15 @@ def main():
         logging.info("Starting installation process in a separate thread...")
         install_thread = threading.Thread(target=perform_installation)
         install_thread.start()
-        
         while install_thread.is_alive():
             app.processEvents()
-            time.sleep(0.05)
-            
+            time.sleep(0.05)            
     except Exception as e:
         logging.error(f"Error starting installation thread: {e}")
-
     app.exec_()
 
+
+
+""" Start the program """
 if __name__ == "__main__":
     main()
