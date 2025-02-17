@@ -20,8 +20,8 @@ def is_windows_11():
 """ Utility function to check installation date """
 def get_installation_date():
     try:
-        windows_path = "C:\\Windows"
-        creation_time = os.path.getctime(windows_path)
+        user_folder = os.path.expanduser("~")
+        creation_time = os.path.getctime(user_folder)
         return datetime.fromtimestamp(creation_time)
     except Exception as e:
         return None
