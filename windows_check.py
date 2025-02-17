@@ -20,10 +20,9 @@ def is_windows_11():
 """ Utility function to check installation date """
 def get_installation_date():
     try:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\Setup")
-        install_date, _ = winreg.QueryValueEx(key, "InstallDate")
-        winreg.CloseKey(key)
-        return datetime.fromtimestamp(install_date)
+        windows_path = "C:\\Windows"
+        creation_time = os.path.getctime(windows_path)
+        return datetime.fromtimestamp(creation_time)
     except Exception as e:
         return None
 
