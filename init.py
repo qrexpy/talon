@@ -20,7 +20,7 @@ import platform
 import winreg
 
 """ Establish the version of Talon """
-TALON_VERSION = "1.1.0"
+TALON_VERSION = "1.1.3"
 
 """ Set up the log file """
 LOG_FILE = "talon.txt"
