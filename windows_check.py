@@ -17,17 +17,6 @@ def is_windows_11():
 
 
 
-""" Utility function to check installation date """
-def get_installation_date():
-    try:
-        user_folder = os.path.expanduser("~")
-        creation_time = os.path.getctime(user_folder)
-        return datetime.fromtimestamp(creation_time)
-    except Exception as e:
-        return None
-
-
-
 """ Utility function to display a UI error popout """
 def show_error(message):
     app = QApplication(sys.argv)
@@ -40,7 +29,7 @@ def show_error(message):
 
 
 
-""" Check the system for if it is running Windows 10 or was installed longer than 1 day ago """
+""" Check the system for if it is running Windows 10 or older """
 def check_system():
     if not is_windows_11():
         show_error("You are currently on Windows 10 or older. Talon is designed to only work on freshly installed Windows 11 systems. Please update to a fresh installation of Windows 11 before attempting to use Talon again.")
@@ -48,10 +37,8 @@ def check_system():
     install_date = get_installation_date()
     if install_date is None:
         show_error("Could not determine Windows installation date. Please ensure your system is properly configured.")
-    
-    days_since_install = (datetime.now() - install_date).days
-    if days_since_install > 1:
-        show_error(f"Your Windows installation is {days_since_install} days old. Talon is designed to work only on freshly installed Windows 11 systems.")
+
+
 
 """ Start the program """
 if __name__ == "__main__":
