@@ -7,6 +7,7 @@ import platform
 import subprocess
 import ssl
 import urllib.request
+import zipfile
 from pathlib import Path
 from tqdm import tqdm
 
@@ -48,7 +49,7 @@ def add_defender_exclusion(path):
 
 
 
-""" Utility path to get the installation path for Raven software """
+""" Utility function to get the installation path for Raven software """
 def get_installation_path():
     if platform.system() == "Windows":
         install_path = Path(os.getenv('APPDATA')) / "ravendevteam"
@@ -60,7 +61,7 @@ def get_installation_path():
 
 
 
-""" Utility function to download a program """
+""" Utility function to download a file """
 def download_file(url, destination, desc="Downloading"):
     try:
         context = ssl._create_unverified_context()
@@ -80,13 +81,33 @@ def download_file(url, destination, desc="Downloading"):
 
 
 
-""" Utility function to create a shortcut at the desktop """
-def create_shortcut(target_path, shortcut_name):
+""" Extract ZIP file to the target directory """
+def extract_zip(zip_path, extract_to):
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+        log(f"Extracted {zip_path} to {extract_to}")
+        return True
+    except Exception as e:
+        log(f"Failed to extract {zip_path}: {e}")
+        return False
+
+
+
+""" Utility function to create a shortcut to the first EXE file found """
+def create_shortcut(target_dir, shortcut_name):
     try:
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
         shortcut_path = os.path.join(desktop, f"{shortcut_name}.lnk")
-        
-        os.system(f'cmd /c mklink "{shortcut_path}" "{target_path}"')
+
+        exe_files = list(target_dir.glob("*.exe"))
+        if not exe_files:
+            log(f"No EXE file found in {target_dir}, skipping shortcut creation")
+            return False
+
+        exe_file = exe_files[0]
+
+        os.system(f'cmd /c mklink "{shortcut_path}" "{exe_file}"')
         log(f"Created shortcut for {shortcut_name}")
         return True
     except Exception as e:
@@ -95,22 +116,31 @@ def create_shortcut(target_path, shortcut_name):
 
 
 
-""" Utility function to install the specified package """
+""" Install the specified package """
 def install_package(package, install_dir):
     platform_name = platform.system()
     if platform_name not in package["os"]:
         log(f"Package {package['name']} is not available for {platform_name}")
         return False
+    
     package_dir = install_dir / package["name"]
     package_dir.mkdir(parents=True, exist_ok=True)
+    
     url = package["url"][platform_name]
     file_name = url.split("/")[-1]
     download_path = package_dir / file_name
+
     log(f"Installing {package['name']} v{package['version']}...")
+
     if not download_file(url, download_path, f"Downloading {package['name']}"):
         return False
+
+    if not extract_zip(download_path, package_dir):
+        return False
+
     if package["shortcut"] and platform_name == "Windows":
-        create_shortcut(str(download_path), package["name"])
+        create_shortcut(package_dir, package["name"])
+
     log(f"Successfully installed {package['name']}")
     return True
 
@@ -127,8 +157,10 @@ def run_toolbox():
     if not packages_data:
         log("Failed to fetch packages data")
         return False
+
     install_dir = get_installation_path()
     install_dir.mkdir(parents=True, exist_ok=True)
+
     success = True
     for package in packages_data["packages"]:
         if not install_package(package, install_dir):
@@ -136,6 +168,7 @@ def run_toolbox():
             log(f"Failed to install {package['name']}")
         else:
             log(f"Successfully installed {package['name']}")
+
     log("Installation process completed" + (" successfully" if success else " with some failures"))
     return success
 
@@ -150,6 +183,9 @@ def main():
         log(f"Unexpected error: {e}")
         return False
 
+
+
+""" Run the program """
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
