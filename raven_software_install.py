@@ -20,7 +20,7 @@ def log(message):
 
 """ Utility function to fetch the packages.json file """
 def get_packages_json():
-    url = "https://raw.githubusercontent.com/ravendevteam/toolbox/refs/heads/main/packages.json"
+    url = "https://code.ravendevteam.org/packages.json"
     try:
         context = ssl._create_unverified_context()
         response = urllib.request.urlopen(url, context=context)

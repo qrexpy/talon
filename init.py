@@ -14,13 +14,14 @@ import debloat_windows
 import raven_software_install
 import browser_install
 import windows_check
+import apply_background
 import time
 from PyQt5.QtCore import QTimer
 import platform
 import winreg
 
 """ Establish the version of Talon """
-TALON_VERSION = "1.1.3"
+TALON_VERSION = "1.1.4"
 
 """ Set up the log file """
 LOG_FILE = "talon.txt"
@@ -155,6 +156,12 @@ def main():
             logging.info(f"{selected_browser} browser installation complete.")
         except Exception as e:
             logging.error(f"Error during browser installation: {e}")
+        try:
+            logging.info("Applying background settings...")
+            apply_background.main()
+            logging.info("Background settings applied successfully.")
+        except Exception as e:
+            logging.error(f"Error applying background settings: {e}")
         try:
             logging.info("Applying Windows registry modifications and customizations...")
             debloat_windows.apply_registry_changes()
