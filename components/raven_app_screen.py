@@ -1,17 +1,14 @@
 """ Import necessary modules for the program to work """
+import os
+import sys
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QGraphicsDropShadowEffect, QSpacerItem, QSizePolicy, QGraphicsView
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QGraphicsDropShadowEffect, QGraphicsView
 )
 from PyQt5.QtGui import QColor, QFont, QFontDatabase, QPixmap
 from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve
-import os
-import sys
-
-
 
 """ Create a class for the buttons in the UI """
 class AnimatedButton(QPushButton):
-
     """ Initialization """
     def __init__(self, text, color, hover_color=None):
         super().__init__(text)
@@ -45,11 +42,8 @@ class AnimatedButton(QPushButton):
         self.animation.start()
         super().leaveEvent(event)
 
-
-
 """ Create a class for the Raven app selection UI """
 class RavenAppScreen(QWidget):
-
     """ Initialization """
     def __init__(self):
         super().__init__()
@@ -58,62 +52,63 @@ class RavenAppScreen(QWidget):
         self.showFullScreen()
         self.setStyleSheet("background-color: black;")
         self.load_chakra_petch_font()
+
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         layout.setContentsMargins(0, 0, 0, 0)
+
         title_label = QLabel("Optional: Install Raven Software")
         title_label.setStyleSheet("color: white; font-weight: bold;")
         title_label.setFont(QFont("Chakra Petch", 24, QFont.Bold))
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
-        body_label = QLabel(
-            "Simple, powerful, and privacy focused. Lightweight software designed to just work, with minimal distractions and hassle."
-        )
+
+        body_label = QLabel("Simple, powerful, and privacy focused. Lightweight software designed to just work, with minimal distractions and hassle.")
         body_label.setStyleSheet("color: white; font-weight: normal;")
         body_label.setFont(QFont("Chakra Petch", 16))
         body_label.setWordWrap(True)
         body_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(body_label)
+
         image_label = QLabel(self)
-        if getattr(sys, 'frozen', False):
-            base_path = sys._MEIPASS
-        else:
-            base_path = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(base_path, "additional_software_offer.png")
+        image_path = self.get_resource_path("additional_software_offer.png")
         pixmap = QPixmap(image_path)
         scaled_pixmap = pixmap.scaledToWidth(int(self.width() * 0.6), Qt.SmoothTransformation)
         image_label.setPixmap(scaled_pixmap)
         image_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(image_label)
+
         button_layout = QHBoxLayout()
         button_layout.setSpacing(20)
         button_layout.setAlignment(Qt.AlignCenter)
+
         yes_button = AnimatedButton("Yes, Install", QColor(34, 139, 34), QColor(50, 205, 50))
         no_button = AnimatedButton("No, Thanks", QColor(139, 0, 0), QColor(205, 92, 92))
         yes_button.clicked.connect(lambda: self.select_option(True))
         no_button.clicked.connect(lambda: self.select_option(False))
         button_layout.addWidget(yes_button)
         button_layout.addWidget(no_button)
+
         layout.addLayout(button_layout)
         self.setLayout(layout)
         self.selected_option = None
 
     """ Load the Chakra Petch font, which is used for the UI """
     def load_chakra_petch_font(self):
-        try:
-            if getattr(sys, 'frozen', False):
-                base_path = sys._MEIPASS
-            else:
-                base_path = os.path.dirname(os.path.abspath(__file__))
-            font_path = os.path.join(base_path, "ChakraPetch-Regular.ttf")
+        font_path = self.get_resource_path("ChakraPetch-Regular.ttf")
+        font_id = QFontDatabase.addApplicationFont(font_path)
+        if font_id == -1:
+            print("Failed to load font.")
+        else:
+            print("Font loaded successfully.")
 
-            font_id = QFontDatabase.addApplicationFont(font_path)
-            if font_id == -1:
-                print("Failed to load font.")
-            else:
-                print("Font loaded successfully.")
-        except Exception as e:
-            print(f"Error loading font: {e}")
+    """ Get the correct resource path """
+    def get_resource_path(self, relative_path):
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        return os.path.join(base_path, relative_path)
 
     """ Return the selected option """
     def select_option(self, option):

@@ -36,15 +36,15 @@ def get_packages_json():
 def add_defender_exclusion(path):
     try:
         subprocess.run(
-            ['powershell', '-Command', 
+            ['powershell.exe', '-ExecutionPolicy', 'Bypass', '-NoProfile', '-Command', 
              f'Add-MpPreference -ExclusionPath "{path}"'],
             check=True,
             capture_output=True
         )
-        log(f"Added Windows Defender exclusion for: {path}")
+        print(f"Added Windows Defender exclusion for: {path}")
         return True
     except Exception as e:
-        log(f"Failed to add Windows Defender exclusion: {e}")
+        print(f"Failed to add Windows Defender exclusion: {e}")
         return False
 
 
@@ -70,7 +70,6 @@ def download_file(url, destination, desc="Downloading"):
                 if total_size > 0:
                     pbar.total = total_size
                 pbar.update(block_size)
-            
             opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=context))
             urllib.request.install_opener(opener)
             urllib.request.urlretrieve(url, destination, reporthook=report_hook)
@@ -99,14 +98,11 @@ def create_shortcut(target_dir, shortcut_name):
     try:
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
         shortcut_path = os.path.join(desktop, f"{shortcut_name}.lnk")
-
         exe_files = list(target_dir.glob("*.exe"))
         if not exe_files:
             log(f"No EXE file found in {target_dir}, skipping shortcut creation")
             return False
-
         exe_file = exe_files[0]
-
         os.system(f'cmd /c mklink "{shortcut_path}" "{exe_file}"')
         log(f"Created shortcut for {shortcut_name}")
         return True
@@ -122,25 +118,18 @@ def install_package(package, install_dir):
     if platform_name not in package["os"]:
         log(f"Package {package['name']} is not available for {platform_name}")
         return False
-    
     package_dir = install_dir / package["name"]
     package_dir.mkdir(parents=True, exist_ok=True)
-    
     url = package["url"][platform_name]
     file_name = url.split("/")[-1]
     download_path = package_dir / file_name
-
     log(f"Installing {package['name']} v{package['version']}...")
-
     if not download_file(url, download_path, f"Downloading {package['name']}"):
         return False
-
     if not extract_zip(download_path, package_dir):
         return False
-
     if package["shortcut"] and platform_name == "Windows":
         create_shortcut(package_dir, package["name"])
-
     log(f"Successfully installed {package['name']}")
     return True
 
@@ -157,10 +146,8 @@ def run_toolbox():
     if not packages_data:
         log("Failed to fetch packages data")
         return False
-
     install_dir = get_installation_path()
     install_dir.mkdir(parents=True, exist_ok=True)
-
     success = True
     for package in packages_data["packages"]:
         if not install_package(package, install_dir):
@@ -168,10 +155,11 @@ def run_toolbox():
             log(f"Failed to install {package['name']}")
         else:
             log(f"Successfully installed {package['name']}")
-
     log("Installation process completed" + (" successfully" if success else " with some failures"))
     return success
 
+
+""" Main function """
 def main():
     try:
         success = run_toolbox()

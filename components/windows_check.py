@@ -57,6 +57,6 @@ def check_system():
 
 
 
-""" Start the program if running as a standalone script """
+""" Start the program """
 if __name__ == "__main__":
     check_system()

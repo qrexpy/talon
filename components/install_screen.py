@@ -2,14 +2,11 @@
 import sys
 import os
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout
+    QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout, QApplication
 )
 from PyQt5.QtGui import QFont, QFontDatabase, QPainter, QColor, QPen
 from PyQt5.QtCore import Qt, QTimer
 
-
-
-""" Create a class for the installation UI """
 class InstallScreen(QWidget):
     def __init__(self):
         super().__init__()
@@ -20,6 +17,7 @@ class InstallScreen(QWidget):
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setWindowState(Qt.WindowFullScreen | Qt.WindowActive)
         self.load_chakra_petch_font()
+        self.create_screen_overlays()
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -44,19 +42,39 @@ class InstallScreen(QWidget):
 
     """ Load the Chakra Petch font, which is used for the UI """
     def load_chakra_petch_font(self):
-        try:
-            if getattr(sys, 'frozen', False):
-                base_path = sys._MEIPASS
-            else:
-                base_path = os.path.dirname(os.path.abspath(__file__))
-            font_path = os.path.join(base_path, "ChakraPetch-Regular.ttf")
-            font_id = QFontDatabase.addApplicationFont(font_path)
-            if font_id == -1:
-                print("Failed to load font.")
-            else:
-                print("Font loaded successfully.")
-        except Exception as e:
-            print(f"Error loading font: {e}")
+        font_path = self.get_resource_path("ChakraPetch-Regular.ttf")
+        font_id = QFontDatabase.addApplicationFont(font_path)
+        if font_id == -1:
+            print("Failed to load font.")
+        else:
+            print("Font loaded successfully.")
+
+    """ Get the correct resource path """
+    def get_resource_path(self, relative_path):
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        return os.path.join(base_path, relative_path)
+
+    """ Create overlays for other screens """
+    def create_screen_overlays(self):
+        app = QApplication.instance()
+        screens = app.screens()
+        self.overlays = []
+        for screen in screens[1:]:
+            overlay = QWidget()
+            overlay.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+            overlay.setGeometry(screen.geometry())
+            overlay.setStyleSheet("background-color: black;")
+            overlay.showFullScreen()
+            self.overlays.append(overlay)
+
+    """ Override the close() method to close all overlays """
+    def close(self):
+        for overlay in self.overlays:
+            overlay.close()
+        super().close()
 
 
 
@@ -95,3 +113,12 @@ class LoadingSpinner(QFrame):
         if self.angle <= -360:
             self.angle = 0
         super().update()
+
+
+
+""" Start the program """
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = InstallScreen()
+    window.show()
+    sys.exit(app.exec_())

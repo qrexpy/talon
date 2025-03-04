@@ -187,7 +187,10 @@ def run_tweaks():
         sys.exit(1)
 
     try:
-        json_path = os.path.join(sys._MEIPASS if hasattr(sys, "_MEIPASS") else os.path.dirname(__file__), "barebones.json")
+        if hasattr(sys, "_MEIPASS"):
+            json_path = os.path.join(sys._MEIPASS, "barebones.json")
+        else:
+            json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "barebones.json"))
 
         log(f"Using config from: {json_path}")
 

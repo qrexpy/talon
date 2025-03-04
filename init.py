@@ -5,23 +5,33 @@ import ctypes
 import subprocess
 import threading
 import logging
-from PyQt5.QtWidgets import QApplication
-from browser_select_screen import BrowserSelectScreen
-from defender_check import DefenderCheck
-from raven_app_screen import RavenAppScreen
-from install_screen import InstallScreen
-import debloat_windows
-import raven_software_install
-import browser_install
-import windows_check
-import apply_background
 import time
-from PyQt5.QtCore import QTimer
 import platform
 import winreg
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer
+# Talon components
+from components.browser_select_screen import BrowserSelectScreen
+from components.defender_check import DefenderCheck
+from components.raven_app_screen import RavenAppScreen
+from components.install_screen import InstallScreen
+from components import debloat_windows
+from components import raven_software_install
+from components import browser_install
+from components import windows_check
+from components import apply_background
+
+
 
 """ Establish the version of Talon """
-TALON_VERSION = "1.1.4"
+TALON_VERSION = "1.2.0"
+
+
+
+""" Check for developer mode flag """
+developer_mode = 1 if "--developer-mode" in sys.argv else 0
+
+
 
 """ Set up the log file """
 LOG_FILE = "talon.txt"
@@ -36,16 +46,17 @@ logging.basicConfig(
 """ Utility function to obtain information about Windows """
 def get_windows_info():
     try:
-        windows_version = platform.win32_ver()
         reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
         key = winreg.OpenKey(reg, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
-        
-        build_number = winreg.QueryValueEx(key, "CurrentBuildNumber")[0]
+        build_number = int(winreg.QueryValueEx(key, "CurrentBuildNumber")[0])
         product_name = winreg.QueryValueEx(key, "ProductName")[0]
         display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
-        
+        if build_number >= 22000: # Windows 11 builds start from 22000
+            os_version = "Windows 11"
+        else:
+            os_version = "Windows 10"
         return {
-            'version': windows_version[0],
+            'version': os_version,
             'build': build_number,
             'product_name': product_name,
             'display_version': display_version
@@ -82,6 +93,8 @@ def restart_as_admin():
 """ Main function to begin Talon installation """
 def main():
     logging.info("Starting Talon Installer")
+    if developer_mode:
+        logging.warn(f"RUNNING IN DEVELOPER MODE!")
     logging.info(f"Talon Version: {TALON_VERSION}")
     windows_info = get_windows_info()
     if windows_info:
@@ -134,12 +147,14 @@ def main():
         raven_app_screen.close()
     except Exception as e:
         logging.error(f"Error during Raven app installation decision: {e}")
-    try:
-        logging.info("Displaying installation screen...")
-        install_screen = InstallScreen()
-        install_screen.show()
-    except Exception as e:
-        logging.error(f"Error during installation screen setup: {e}")
+    install_screen = None
+    if not developer_mode:
+        try:
+            logging.info("Displaying installation screen...")
+            install_screen = InstallScreen()
+            install_screen.show()
+        except Exception as e:
+            logging.error(f"Error during installation screen setup: {e}")
 
     """ Run the installation process """
     def perform_installation():
@@ -169,7 +184,8 @@ def main():
         except Exception as e:
             logging.error(f"Error applying registry changes: {e}")
         logging.info("All installations and configurations completed.")
-        install_screen.close()
+        if install_raven:
+            install_screen.close()
         logging.info("Installation complete. Restarting system...")
         debloat_windows.finalize_installation()
 
