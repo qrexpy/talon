@@ -9,7 +9,8 @@ def install_browser(selected_browser):
         "Chrome": "Google.Chrome",
         "Brave": "Brave.Brave",
         "Firefox": "Mozilla.Firefox",
-        "Librewolf": "Librewolf.Librewolf"
+        "Librewolf": "Librewolf.Librewolf",
+        "Edge": "Microsoft.Edge"
     }
     if selected_browser not in browser_map:
         print(f"Unknown browser selected: {selected_browser}")
