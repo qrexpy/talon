@@ -64,11 +64,9 @@ class BrowserSelectScreen(QWidget):
         self.showFullScreen()
         self.setStyleSheet("background-color: black;")
         self.load_chakra_petch_font()
-
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         layout.setContentsMargins(0, 0, 0, 0)
-
         title_layout = QVBoxLayout()
         title_label = QLabel("Welcome. Select a web browser")
         title_label.setStyleSheet("color: white; font-weight: bold;")
@@ -77,7 +75,6 @@ class BrowserSelectScreen(QWidget):
         title_layout.addWidget(title_label)
         title_layout.setStretch(0, 1)
         layout.addLayout(title_layout)
-
         image_label = QLabel(self)
         image_path = self.get_resource_path("browser_selection.png")
         pixmap = QPixmap(image_path)
@@ -85,7 +82,6 @@ class BrowserSelectScreen(QWidget):
         image_label.setPixmap(scaled_pixmap)
         image_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(image_label)
-
         browsers = {
             "Chrome": QColor(255, 255, 255),
             "Edge": QColor(255, 255, 255),
@@ -97,7 +93,6 @@ class BrowserSelectScreen(QWidget):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(20)
         button_layout.setAlignment(Qt.AlignCenter)
-
         button_columns = []
         for browser, color in browsers.items():
             column_layout = QVBoxLayout()
@@ -105,7 +100,6 @@ class BrowserSelectScreen(QWidget):
             button = AnimatedButton(browser, color, is_brave=(browser == "Brave"))
             button.clicked.connect(lambda _, b=browser: self.select_browser(b))
             column_layout.addWidget(button)
-
             if browser == "Brave":
                 label = QLabel("Recommended Browser")
                 label.setStyleSheet("color: rgb(34, 139, 34); font-weight: bold; background: transparent;")
@@ -115,12 +109,9 @@ class BrowserSelectScreen(QWidget):
                 column_layout.addWidget(label)
                 spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
                 column_layout.addItem(spacer)
-
             button_columns.append(column_layout)
-
         for column in button_columns:
             button_layout.addLayout(column)
-
         layout.addLayout(button_layout)
         self.setLayout(layout)
 

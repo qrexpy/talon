@@ -18,9 +18,9 @@ To compile from source, make sure you have Python 3.12.4 or greater, and Nuitka,
 
 - [Raven Development Team](https://ravendevteam.org/)
 - [Icons by Icons8](https://icons8.com/)
-- [mre31](https://github.com/mre31) (Contributor, Early Tester)
 - [ChrisTitusTech](https://github.com/christitustech) ([CTT WinUtil](https://github.com/christitustech/winutil))
 - [Raphire](https://github.com/Raphire) ([Win11Debloat](https://github.com/Raphire/Win11Debloat))
+- [mre31](https://github.com/mre31) (Contributor, Early Tester)
 - [urbanawakening](https://github.com/urbanawakening) (Documentation Contributor)
 - [Mskitty301](https://github.com/Mskitty301) (Documentation Contributor)
 - [SuperSonic3459](https://github.com/SuperSonic3459) (Documentation Contributor)
