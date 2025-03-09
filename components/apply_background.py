@@ -1,8 +1,12 @@
+""" Import the necessary modules for the program to work """
 import os
 import sys
 import ctypes
 import shutil
 
+
+
+""" Function to set the wallpaper """
 def set_wallpaper(image_path):
     try:
         result = ctypes.windll.user32.SystemParametersInfoW(20, 0, image_path, 3)
@@ -13,11 +17,20 @@ def set_wallpaper(image_path):
     except Exception as e:
         print(f"Error setting wallpaper: {e}")
 
+
+
+""" Function to get the path if the application is in an uncompiled state """
+def unfrozen_path():
+    path = os.path.dirname(os.path.abspath(__file__))
+    if path.endswith("\\components"):
+        return path[:path.rfind("\\components")]
+    return path
+
+
+
+""" Main function to copy the image to the Pictures directory and set it as the wallpaper """
 def main():
-    if getattr(sys, 'frozen', False):
-        resource_path = sys._MEIPASS
-    else:
-        resource_path = os.path.dirname(os.path.abspath(__file__))
+    resource_path = getattr(sys, '_MEIPASS', unfrozen_path())
     source_image_path = os.path.join(resource_path, "DesktopBackground.png")
     if not os.path.exists(source_image_path):
         print(f"Error: Source image not found at {source_image_path}")
@@ -33,5 +46,8 @@ def main():
         return
     set_wallpaper(destination_image_path)
 
+
+
+""" Run the main function """
 if __name__ == "__main__":
     main()
