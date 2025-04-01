@@ -28,7 +28,7 @@ To compile from source, make sure you have Python 3.12.4 or greater, and Nuitka,
 - [swordmasterliam](https://github.com/swordmasterliam) (Documentation Contributor)
 - [Neoskimmer](https://github.com/Neoskimmer) (Documentation Contributor)
 - [lukkaisito](https://github.com/lukkaisito) (Documentation Contributor)
-- [alcainoism] (Documentation Contributor)
+- [alcainoism](https://github.com/alcainoism) (Documentation Contributor)
 - [JanluOfficial](https://github.com/JanluOfficial) (Documentation Contributor)
 - [Xirdrak](https://github.com/Xirdrak) (Documentation Contributor)
 - [Alandlt15](https://github.com/Alandlt15) (Documentation Contributor)
